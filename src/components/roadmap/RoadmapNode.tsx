@@ -7,7 +7,6 @@ import type { RoadmapNode as RoadmapNodeType, NodeStatus } from "@/lib/types"
 export type RoadmapNodeData = {
   node: RoadmapNodeType
   status: NodeStatus
-  onClick: (node: RoadmapNodeType) => void
 }
 
 const priorityLabel: Record<string, string> = {
@@ -23,11 +22,10 @@ const priorityStyle: Record<string, string> = {
 }
 
 export function RoadmapNodeCard({ data }: NodeProps) {
-  const { node, status, onClick } = data as RoadmapNodeData
+  const { node, status } = data as RoadmapNodeData
 
   return (
     <div
-      onClick={() => status !== "locked" && onClick(node)}
       className={[
         "w-52 border rounded-xl p-4 transition-all select-none",
         status === "completed"

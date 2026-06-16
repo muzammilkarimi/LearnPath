@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import {
   ReactFlow,
   Background,
@@ -8,6 +8,7 @@ import {
   MarkerType,
   type Node,
   type Edge,
+  type NodeMouseHandler,
   BackgroundVariant,
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
@@ -27,7 +28,6 @@ export function RoadmapGraph({ roadmap }: Props) {
   const [selectedNode, setSelectedNode] = useState<RoadmapNode | null>(null)
   const { completedLessons, completedRoadmapNodes, toggleRoadmapNode } = useProgressStore()
 
-  // A node is "done" if its linked lesson is completed OR it was manually marked done
   const completedSet = useMemo(() => {
     const s = new Set<string>()
     for (const node of roadmap.nodes) {
@@ -41,28 +41,23 @@ export function RoadmapGraph({ roadmap }: Props) {
     return s
   }, [roadmap.nodes, completedLessons, completedRoadmapNodes])
 
-  function getStatus(node: RoadmapNode): NodeStatus {
+  const getStatus = useCallback((node: RoadmapNode): NodeStatus => {
     if (completedSet.has(node.id)) return "completed"
     const allPrereqsDone = node.prerequisites.every((p) => completedSet.has(p))
     return allPrereqsDone ? "available" : "locked"
-  }
+  }, [completedSet])
 
-  const handleNodeClick = useCallback((node: RoadmapNode) => {
-    setSelectedNode((prev) => (prev?.id === node.id ? null : node))
-  }, [])
-
-  const rfNodes: Node[] = roadmap.nodes.map((node) => ({
+  const rfNodes: Node[] = useMemo(() => roadmap.nodes.map((node) => ({
     id: node.id,
     type: "roadmapNode",
     position: node.position,
     data: {
       node,
       status: getStatus(node),
-      onClick: handleNodeClick,
     } satisfies RoadmapNodeData,
-  }))
+  })), [roadmap.nodes, getStatus])
 
-  const rfEdges: Edge[] = roadmap.edges.map((edge) => ({
+  const rfEdges: Edge[] = useMemo(() => roadmap.edges.map((edge) => ({
     id: edge.id,
     source: edge.source,
     target: edge.target,
@@ -74,7 +69,7 @@ export function RoadmapGraph({ roadmap }: Props) {
       width: 14,
       height: 14,
     },
-  }))
+  })), [roadmap.edges])
 
   const stats = useMemo(() => {
     const total = roadmap.nodes.length
@@ -84,8 +79,14 @@ export function RoadmapGraph({ roadmap }: Props) {
       .filter((n) => !completedSet.has(n.id))
       .reduce((sum, n) => sum + n.estimatedHours, 0)
     return { total, done, available, totalHours }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roadmap.nodes, completedSet])
+  }, [roadmap.nodes, completedSet, getStatus])
+
+  const handleNodeClick: NodeMouseHandler = useCallback((_, rfNode) => {
+    const roadmapNode = roadmap.nodes.find((n) => n.id === rfNode.id)
+    if (!roadmapNode) return
+    if (getStatus(roadmapNode) === "locked") return
+    setSelectedNode((prev) => (prev?.id === roadmapNode.id ? null : roadmapNode))
+  }, [roadmap.nodes, getStatus])
 
   const selectedStatus = selectedNode ? getStatus(selectedNode) : "locked"
 
@@ -119,15 +120,15 @@ export function RoadmapGraph({ roadmap }: Props) {
           nodes={rfNodes}
           edges={rfEdges}
           nodeTypes={nodeTypes}
+          onNodeClick={handleNodeClick}
           fitView
           fitViewOptions={{ padding: 0.2 }}
           minZoom={0.3}
           maxZoom={1.5}
           nodesDraggable={false}
           nodesConnectable={false}
-          elementsSelectable={false}
           panOnScroll
-          className="!bg-canvas"
+          className="bg-canvas!"
         >
           <Background
             variant={BackgroundVariant.Dots}
@@ -136,7 +137,7 @@ export function RoadmapGraph({ roadmap }: Props) {
             color="rgba(255,255,255,0.04)"
           />
           <Controls
-            className="!bg-canvas !border-hairline [&>button]:!bg-canvas [&>button]:!border-hairline [&>button]:!text-mute [&>button:hover]:!text-ink [&>button]:!fill-current"
+            className="bg-canvas! border-hairline! [&>button]:bg-canvas! [&>button]:border-hairline! [&>button]:text-mute! [&>button:hover]:text-ink! [&>button]:fill-current!"
             showInteractive={false}
           />
         </ReactFlow>
