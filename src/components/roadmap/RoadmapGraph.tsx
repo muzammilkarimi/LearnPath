@@ -1,59 +1,32 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
-import {
-  ReactFlow,
-  Background,
-  Panel,
-  MarkerType,
-  useReactFlow,
-  type Node,
-  type Edge,
-  type NodeMouseHandler,
-  BackgroundVariant,
-} from "@xyflow/react"
-import "@xyflow/react/dist/style.css"
-
-import { Plus, Minus, Maximize2 } from "lucide-react"
+import React, { useState, useMemo } from "react"
+import { Check, Lock, BookOpen } from "lucide-react"
 import { useProgressStore } from "@/store/progressStore"
 import type { Roadmap, RoadmapNode, NodeStatus } from "@/lib/types"
-import { RoadmapNodeCard, type RoadmapNodeData } from "./RoadmapNode"
 import { NodePanel } from "./NodePanel"
 
-const nodeTypes = { roadmapNode: RoadmapNodeCard }
+const NODE_W = 208
+const NODE_H = 90
 
-function ZoomControls() {
-  const { zoomIn, zoomOut, fitView } = useReactFlow()
-  return (
-    <Panel position="bottom-right">
-      <div className="flex flex-col border border-hairline rounded-xl bg-canvas overflow-hidden mb-2 mr-2">
-        <button
-          type="button"
-          onClick={() => zoomIn({ duration: 200 })}
-          className="p-2.5 text-mute hover:text-ink hover:bg-canvas-soft transition-colors border-b border-hairline"
-          aria-label="Zoom in"
-        >
-          <Plus size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={() => zoomOut({ duration: 200 })}
-          className="p-2.5 text-mute hover:text-ink hover:bg-canvas-soft transition-colors border-b border-hairline"
-          aria-label="Zoom out"
-        >
-          <Minus size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={() => fitView({ duration: 300, padding: 0.2 })}
-          className="p-2.5 text-mute hover:text-ink hover:bg-canvas-soft transition-colors"
-          aria-label="Fit view"
-        >
-          <Maximize2 size={13} />
-        </button>
-      </div>
-    </Panel>
-  )
+const priorityLabel: Record<string, string> = {
+  essential: "essential",
+  "good-to-know": "nice to have",
+  optional: "optional",
+}
+const priorityColor: Record<string, string> = {
+  essential: "text-primary",
+  "good-to-know": "text-yellow-400",
+  optional: "text-mute",
+}
+
+function edgePath(src: RoadmapNode, tgt: RoadmapNode) {
+  const x1 = src.position.x + NODE_W / 2
+  const y1 = src.position.y + NODE_H
+  const x2 = tgt.position.x + NODE_W / 2
+  const y2 = tgt.position.y
+  const cy = (y1 + y2) / 2
+  return `M ${x1} ${y1} C ${x1} ${cy} ${x2} ${cy} ${x2} ${y2}`
 }
 
 interface Props {
@@ -70,111 +43,162 @@ export function RoadmapGraph({ roadmap }: Props) {
       const lessonDone = node.linkedLessonPath
         ? !!completedLessons[node.linkedLessonPath.split("/").pop() ?? ""]
         : false
-      if (lessonDone || completedRoadmapNodes[node.id]) {
-        s.add(node.id)
-      }
+      if (lessonDone || completedRoadmapNodes[node.id]) s.add(node.id)
     }
     return s
   }, [roadmap.nodes, completedLessons, completedRoadmapNodes])
 
-  const getStatus = useCallback((node: RoadmapNode): NodeStatus => {
+  function getStatus(node: RoadmapNode): NodeStatus {
     if (completedSet.has(node.id)) return "completed"
-    const allPrereqsDone = node.prerequisites.every((p) => completedSet.has(p))
-    return allPrereqsDone ? "available" : "locked"
-  }, [completedSet])
+    return node.prerequisites.every((p) => completedSet.has(p)) ? "available" : "locked"
+  }
 
-  const rfNodes: Node[] = useMemo(() => roadmap.nodes.map((node) => ({
-    id: node.id,
-    type: "roadmapNode",
-    position: node.position,
-    data: { node, status: getStatus(node) } satisfies RoadmapNodeData,
-  })), [roadmap.nodes, getStatus])
+  const nodeMap = useMemo(
+    () => new Map(roadmap.nodes.map((n) => [n.id, n])),
+    [roadmap.nodes]
+  )
 
-  const rfEdges: Edge[] = useMemo(() => roadmap.edges.map((edge) => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    type: "smoothstep",
-    style: { stroke: "rgba(255,255,255,0.08)", strokeWidth: 1.5 },
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      color: "rgba(255,255,255,0.12)",
-      width: 14,
-      height: 14,
-    },
-  })), [roadmap.edges])
+  const canvasW = Math.max(...roadmap.nodes.map((n) => n.position.x)) + NODE_W + 60
+  const canvasH = Math.max(...roadmap.nodes.map((n) => n.position.y)) + NODE_H + 60
 
   const stats = useMemo(() => {
-    const total = roadmap.nodes.length
     const done = roadmap.nodes.filter((n) => completedSet.has(n.id)).length
     const available = roadmap.nodes.filter((n) => getStatus(n) === "available").length
-    const totalHours = roadmap.nodes
+    const hoursLeft = roadmap.nodes
       .filter((n) => !completedSet.has(n.id))
-      .reduce((sum, n) => sum + n.estimatedHours, 0)
-    return { total, done, available, totalHours }
-  }, [roadmap.nodes, completedSet, getStatus])
-
-  const handleNodeClick: NodeMouseHandler = useCallback((_, rfNode) => {
-    const roadmapNode = roadmap.nodes.find((n) => n.id === rfNode.id)
-    if (!roadmapNode) return
-    if (getStatus(roadmapNode) === "locked") return
-    setSelectedNode((prev) => (prev?.id === roadmapNode.id ? null : roadmapNode))
-  }, [roadmap.nodes, getStatus])
+      .reduce((s, n) => s + n.estimatedHours, 0)
+    return { total: roadmap.nodes.length, done, available, hoursLeft }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roadmap.nodes, completedSet])
 
   const selectedStatus = selectedNode ? getStatus(selectedNode) : "locked"
 
   return (
-    <div className="flex h-full">
-      <div className="flex-1 relative">
-        {/* Progress bar */}
-        <div className="absolute top-0 left-0 right-0 z-10 px-5 py-3 flex items-center gap-6 bg-canvas/90 backdrop-blur-sm border-b border-hairline">
-          <div className="flex-1 h-1 bg-hairline rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${(stats.done / stats.total) * 100}%` }} /* dynamic progress width */
-            />
-          </div>
-          <div className="flex items-center gap-4 text-xs text-mute shrink-0">
-            <span className="text-primary font-semibold font-mono">{stats.done}/{stats.total}</span>
-            <span>nodes done</span>
-            <span className="text-hairline">·</span>
-            <span>~{stats.totalHours}h remaining</span>
-            {stats.available > 0 && (
-              <>
-                <span className="text-hairline">·</span>
-                <span className="text-yellow-400">{stats.available} available now</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        <ReactFlow
-          nodes={rfNodes}
-          edges={rfEdges}
-          nodeTypes={nodeTypes}
-          onNodeClick={handleNodeClick}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          minZoom={0.25}
-          maxZoom={1.5}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          zoomOnScroll
-          zoomOnPinch
-          panOnDrag
-          preventScrolling={false}
-          className="bg-canvas!"
-        >
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={24}
-            size={1}
-            color="rgba(255,255,255,0.04)"
+    <div className="relative">
+      {/* Progress bar */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="flex-1 h-1 bg-hairline rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-500 w-(--progress)"
+            style={{ "--progress": `${(stats.done / stats.total) * 100}%` } as React.CSSProperties}
           />
-          <ZoomControls />
-        </ReactFlow>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-mute shrink-0">
+          <span className="font-mono text-primary font-semibold">{stats.done}/{stats.total}</span>
+          <span className="text-hairline">·</span>
+          <span>~{stats.hoursLeft}h left</span>
+          {stats.available > 0 && (
+            <>
+              <span className="text-hairline">·</span>
+              <span className="text-yellow-400">{stats.available} available</span>
+            </>
+          )}
+        </div>
       </div>
 
+      {/* Canvas */}
+      <div className="overflow-x-auto">
+        <div
+          className="relative w-(--cw) h-(--ch)"
+          style={{ "--cw": `${canvasW}px`, "--ch": `${canvasH}px` } as React.CSSProperties}
+        >
+
+          {/* SVG edges */}
+          <svg
+            className="absolute inset-0 pointer-events-none"
+            width={canvasW}
+            height={canvasH}
+          >
+            <defs>
+              <marker
+                id="arrow"
+                markerWidth="6"
+                markerHeight="6"
+                refX="5"
+                refY="3"
+                orient="auto"
+              >
+                <path d="M 0 0 L 6 3 L 0 6 Z" fill="rgba(255,255,255,0.18)" />
+              </marker>
+            </defs>
+            {roadmap.edges.map((edge) => {
+              const src = nodeMap.get(edge.source)
+              const tgt = nodeMap.get(edge.target)
+              if (!src || !tgt) return null
+              return (
+                <path
+                  key={edge.id}
+                  d={edgePath(src, tgt)}
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="1.5"
+                  fill="none"
+                  markerEnd="url(#arrow)"
+                />
+              )
+            })}
+          </svg>
+
+          {/* Nodes */}
+          {roadmap.nodes.map((node) => {
+            const status = getStatus(node)
+            const isSelected = selectedNode?.id === node.id
+
+            return (
+              <button
+                key={node.id}
+                type="button"
+                disabled={status === "locked"}
+                onClick={() =>
+                  setSelectedNode((prev) => (prev?.id === node.id ? null : node))
+                }
+                style={{ "--nx": `${node.position.x}px`, "--ny": `${node.position.y}px` } as React.CSSProperties}
+                className={[
+                  "absolute w-52 text-left border rounded-xl p-4 transition-all left-(--nx) top-(--ny)",
+                  status === "completed"
+                    ? "border-primary/50 bg-primary/8"
+                    : status === "available"
+                      ? isSelected
+                        ? "border-primary bg-canvas-soft"
+                        : "border-hairline bg-canvas hover:border-primary/50 hover:bg-canvas-soft"
+                      : "border-hairline/30 bg-canvas opacity-40 cursor-not-allowed",
+                ].join(" ")}
+              >
+                {/* Priority + dots */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[9px] font-semibold tracking-widest uppercase ${priorityColor[node.priority]}`}>
+                    {priorityLabel[node.priority]}
+                  </span>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-1 h-1 rounded-full ${i < node.interviewWeight ? "bg-primary" : "bg-hairline"}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Title */}
+                <p className={`text-sm font-semibold leading-tight mb-2 ${status === "completed" ? "text-primary" : "text-ink"}`}>
+                  {node.title}
+                </p>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-mute font-mono">{node.estimatedHours}h</span>
+                  {status === "completed" && <Check size={12} className="text-primary" />}
+                  {status === "locked" && <Lock size={11} className="text-mute" />}
+                  {status === "available" && node.linkedLessonPath && (
+                    <BookOpen size={11} className="text-primary" />
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Node detail panel */}
       {selectedNode && (
         <NodePanel
           node={selectedNode}

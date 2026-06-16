@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ChevronRight, Clock, Map } from "lucide-react"
+import { ChevronRight, Clock } from "lucide-react"
 import { getRoadmap } from "@/content/roadmaps"
 import { RoadmapGraph } from "@/components/roadmap/RoadmapGraph"
 
@@ -16,9 +16,9 @@ export default async function RoadmapPage({ params }: Props) {
   const essentialCount = roadmap.nodes.filter((n) => n.priority === "essential").length
 
   return (
-    <div className="h-screen flex flex-col bg-canvas overflow-hidden">
-      {/* Top bar */}
-      <div className="border-b border-hairline px-4 md:px-6 py-3 flex items-center justify-between shrink-0 bg-canvas">
+    <div className="min-h-screen bg-canvas">
+      {/* Sticky top bar */}
+      <div className="sticky top-14 z-20 border-b border-hairline px-4 md:px-6 py-3 flex items-center justify-between bg-canvas/95 backdrop-blur-sm">
         <div className="flex items-center gap-2 text-xs text-mute overflow-hidden">
           <Link href="/" className="hover:text-ink transition-colors shrink-0">Home</Link>
           <ChevronRight size={11} className="shrink-0" />
@@ -26,24 +26,22 @@ export default async function RoadmapPage({ params }: Props) {
           <ChevronRight size={11} className="shrink-0" />
           <span className="text-body truncate">{roadmap.title}</span>
         </div>
-
         <div className="flex items-center gap-4 text-xs text-mute shrink-0 ml-4">
           <span className="hidden sm:flex items-center gap-1">
-            <Clock size={11} />
-            ~{roadmap.totalHours}h total
+            <Clock size={11} /> ~{roadmap.totalHours}h total
           </span>
           <span className="hidden sm:block">{roadmap.nodes.length} topics</span>
           <span className="text-primary font-semibold">{essentialCount} essential</span>
         </div>
       </div>
 
-      {/* React Flow graph (fills remaining height) */}
-      <div className="flex-1 min-h-0 pt-10">
+      {/* Roadmap canvas — scrolls naturally with the page */}
+      <div className="px-4 md:px-8 py-10">
         <RoadmapGraph roadmap={roadmap} />
       </div>
 
       {/* Legend */}
-      <div className="border-t border-hairline px-4 md:px-6 py-2.5 flex items-center gap-6 shrink-0 bg-canvas">
+      <div className="border-t border-hairline px-4 md:px-6 py-3 flex flex-wrap items-center gap-6">
         <div className="flex items-center gap-4 text-[11px] text-mute">
           {[
             { label: "Essential", dot: "bg-primary" },
