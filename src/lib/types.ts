@@ -60,5 +60,45 @@ export interface TechModule {
 export interface UserProgress {
   completedLessons: Record<string, boolean>      // lessonId -> done
   bookmarkedQuestions: Record<string, boolean>   // questionId -> saved
+  completedRoadmapNodes: Record<string, boolean> // nodeId -> done
   lastVisited?: string                           // lessonId
+}
+
+export type NodePriority = "essential" | "good-to-know" | "optional"
+export type NodeStatus = "locked" | "available" | "completed"
+
+export interface RoadmapNode {
+  id: string
+  title: string
+  description: string
+  why: string                   // why this matters / why in this order
+  priority: NodePriority
+  interviewWeight: 1 | 2 | 3 | 4 | 5
+  estimatedHours: number
+  prerequisites: string[]       // node IDs that must be completed first
+  linkedLessonId?: string       // links to a LearnPath lesson
+  linkedLessonPath?: string     // e.g. "/react/learn/beginner/01-the-dashboard-crisis"
+  tags: string[]
+  position: { x: number; y: number }
+}
+
+export interface RoadmapEdge {
+  id: string
+  source: string
+  target: string
+  why?: string                  // why A must come before B
+}
+
+export interface Roadmap {
+  id: string
+  role: string
+  title: string
+  tagline: string
+  description: string
+  icon: string
+  color: string
+  totalHours: number
+  comingSoon?: boolean
+  nodes: RoadmapNode[]
+  edges: RoadmapEdge[]
 }

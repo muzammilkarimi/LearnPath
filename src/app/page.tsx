@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, BookOpen, Code2, MessageSquare, Zap } from "lucide-react"
+import { ArrowRight, BookOpen, Code2, MessageSquare, Zap, Map } from "lucide-react"
 import { techModules } from "@/content/registry"
 import type { TechModule } from "@/lib/types"
 
@@ -97,6 +97,34 @@ export default function HomePage() {
             {techModules.map((tech) => (
               <TechCard key={tech.id} tech={tech} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Roadmap CTA */}
+      <section className="border-t border-dashed border-hairline px-4 md:px-8 py-12 md:py-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="border border-hairline rounded-xl p-6 md:p-10 flex flex-col md:flex-row md:items-center gap-6 md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Map size={14} className="text-primary" />
+                <p className="text-xs font-semibold tracking-[2.52px] uppercase text-primary">
+                  Developer Roadmaps
+                </p>
+              </div>
+              <h3 className="text-2xl md:text-3xl font-normal text-ink-strong mb-2 tracking-tight">
+                Know exactly what to learn next.
+              </h3>
+              <p className="text-sm text-body max-w-lg leading-6">
+                Interactive roadmaps where every node is ordered by dependency, weighted by interview frequency, and linked to a real lesson.
+              </p>
+            </div>
+            <Link
+              href="/roadmap"
+              className="flex items-center gap-2 bg-primary text-on-primary font-semibold px-5 py-3 rounded-md text-sm hover:bg-primary-soft transition-colors whitespace-nowrap self-start md:self-auto"
+            >
+              Explore Roadmaps <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </section>

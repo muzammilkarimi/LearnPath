@@ -10,6 +10,8 @@ interface ProgressStore extends UserProgress {
   setLastVisited: (lessonId: string) => void
   isCompleted: (lessonId: string) => boolean
   isBookmarked: (questionId: string) => boolean
+  toggleRoadmapNode: (nodeId: string) => void
+  isRoadmapNodeDone: (nodeId: string) => boolean
 }
 
 export const useProgressStore = create<ProgressStore>()(
@@ -17,6 +19,7 @@ export const useProgressStore = create<ProgressStore>()(
     (set, get) => ({
       completedLessons: {},
       bookmarkedQuestions: {},
+      completedRoadmapNodes: {},
       lastVisited: undefined,
 
       completeLesson: (lessonId) =>
@@ -37,6 +40,16 @@ export const useProgressStore = create<ProgressStore>()(
       isCompleted: (lessonId) => !!get().completedLessons[lessonId],
 
       isBookmarked: (questionId) => !!get().bookmarkedQuestions[questionId],
+
+      toggleRoadmapNode: (nodeId) =>
+        set((s) => ({
+          completedRoadmapNodes: {
+            ...s.completedRoadmapNodes,
+            [nodeId]: !s.completedRoadmapNodes[nodeId],
+          },
+        })),
+
+      isRoadmapNodeDone: (nodeId) => !!get().completedRoadmapNodes[nodeId],
     }),
     { name: "learnpath-progress" }
   )
