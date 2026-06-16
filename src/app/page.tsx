@@ -7,29 +7,29 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-canvas">
       {/* Hero */}
-      <section className="border-b border-hairline px-8 py-24">
+      <section className="border-b border-hairline px-4 md:px-8 py-14 md:py-24">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-semibold tracking-[2.52px] uppercase text-primary mb-6">
             Story-Based Learning
           </p>
-          <h1 className="text-[60px] font-normal leading-[60px] tracking-[-0.65px] text-ink-strong max-w-3xl mb-6">
+          <h1 className="text-[38px] md:text-[60px] font-normal leading-tight md:leading-[60px] tracking-[-0.65px] text-ink-strong max-w-3xl mb-6">
             Learn to code the way real devs do it.
           </h1>
-          <p className="text-lg text-body max-w-2xl mb-10 leading-7">
+          <p className="text-base md:text-lg text-body max-w-2xl mb-8 md:mb-10 leading-7">
             No more &quot;hello world&quot; tutorials. Every concept is taught
             through a real workplace situation — bugs to fix, deadlines to meet,
             and a PM breathing down your neck. Just like the job.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <Link
               href="/react/learn/beginner"
-              className="flex items-center gap-2 bg-primary text-on-primary font-semibold px-5 py-3 rounded-[6px] text-base hover:bg-primary-soft transition-colors"
+              className="flex items-center gap-2 bg-primary text-on-primary font-semibold px-5 py-3 rounded-md text-base hover:bg-primary-soft transition-colors"
             >
               Start with React <ArrowRight size={16} />
             </Link>
             <Link
               href="/react/interview"
-              className="flex items-center gap-2 border border-hairline text-ink font-semibold px-5 py-3 rounded-[6px] text-base hover:border-mute transition-colors"
+              className="flex items-center gap-2 border border-hairline text-ink font-semibold px-5 py-3 rounded-md text-base hover:border-mute transition-colors"
             >
               Interview Prep
             </Link>
@@ -38,7 +38,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="border-b border-dashed border-hairline px-8 py-16">
+      <section className="border-b border-dashed border-hairline px-4 md:px-8 py-12 md:py-16">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-semibold tracking-[2.52px] uppercase text-mute mb-10">
             How it works
@@ -79,7 +79,7 @@ export default function HomePage() {
       </section>
 
       {/* Tech modules */}
-      <section className="px-8 py-16">
+      <section className="px-4 md:px-8 py-12 md:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -102,9 +102,9 @@ export default function HomePage() {
       </section>
 
       {/* Stats */}
-      <section className="border-t border-dashed border-hairline px-8 py-12">
+      <section className="border-t border-dashed border-hairline px-4 md:px-8 py-10 md:py-12">
         <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-3 gap-4 md:gap-8 text-center">
             {[
               { value: "15", label: "Lessons available" },
               { value: "36", label: "Interview questions" },
@@ -122,7 +122,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-hairline px-8 py-10">
+      <footer className="border-t border-hairline px-4 md:px-8 py-8 md:py-10">
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Zap size={14} className="text-primary" fill="currentColor" />

@@ -75,7 +75,7 @@ export function CodePlayground({
             className="flex items-center gap-1.5 text-xs text-mute hover:text-ink px-2 py-1 rounded transition-colors"
           >
             <RotateCcw size={11} />
-            Reset
+            <span className="hidden sm:inline">Reset</span>
           </button>
 
           <button
@@ -85,25 +85,25 @@ export function CodePlayground({
           >
             {showSolution ? (
               <>
-                <EyeOff size={11} /> Hide Solution
+                <EyeOff size={11} /> <span className="hidden sm:inline">Hide Solution</span>
               </>
             ) : (
               <>
-                <Eye size={11} /> Show Solution
+                <Eye size={11} /> <span className="hidden sm:inline">Show Solution</span>
               </>
             )}
           </button>
 
           {completed ? (
             <span className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-              <Check size={12} /> Completed
+              <Check size={12} /> <span className="hidden sm:inline">Completed</span>
             </span>
           ) : (
             <button
               onClick={handleMarkComplete}
               className="flex items-center gap-1.5 text-xs font-semibold bg-primary text-on-primary px-3 py-1.5 rounded-md hover:bg-primary-soft transition-colors"
             >
-              <Check size={11} /> Mark Done
+              <Check size={11} /> <span className="hidden sm:inline">Mark Done</span>
             </button>
           )}
         </div>

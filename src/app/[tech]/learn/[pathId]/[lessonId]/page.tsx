@@ -28,38 +28,38 @@ export default async function LessonPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
       {/* Breadcrumb */}
-      <div className="border-b border-hairline px-8 py-3">
+      <div className="border-b border-hairline px-4 md:px-8 py-3">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center gap-2 text-xs text-mute">
-            <Link href="/" className="hover:text-ink transition-colors">
+          <div className="flex items-center gap-2 text-xs text-mute overflow-hidden">
+            <Link href="/" className="hover:text-ink transition-colors shrink-0">
               Home
             </Link>
-            <ChevronRight size={11} />
+            <ChevronRight size={11} className="shrink-0" />
             <Link
               href={`/${techId}`}
-              className="hover:text-ink transition-colors"
+              className="hover:text-ink transition-colors shrink-0"
             >
               {module.name}
             </Link>
-            <ChevronRight size={11} />
+            <ChevronRight size={11} className="shrink-0 hidden sm:block" />
             <Link
               href={`/${techId}/learn/${pathId}`}
-              className="hover:text-ink transition-colors capitalize"
+              className="hover:text-ink transition-colors capitalize hidden sm:block shrink-0"
             >
               {pathId}
             </Link>
-            <ChevronRight size={11} />
-            <span className="text-body truncate max-w-48">{lesson.title}</span>
+            <ChevronRight size={11} className="shrink-0 hidden sm:block" />
+            <span className="text-body truncate hidden sm:block">{lesson.title}</span>
           </div>
         </div>
       </div>
 
-      {/* Main layout: story left, playground right */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left: Story + explanation */}
-        <div className="w-[45%] flex-shrink-0 overflow-y-auto border-r border-hairline">
+      {/* Main layout: story left, playground right (stacked on mobile) */}
+      <div className="flex flex-col md:flex-1 md:flex md:flex-row md:overflow-hidden">
+        {/* Story + explanation */}
+        <div className="md:w-[45%] md:flex-shrink-0 md:overflow-y-auto border-b md:border-b-0 md:border-r border-hairline">
           {/* Story card */}
-          <div className="border-b border-dashed border-hairline p-8">
+          <div className="border-b border-dashed border-hairline p-5 md:p-8">
             <div className="flex items-center gap-3 mb-5">
               <span className="text-xs font-semibold tracking-[2.52px] uppercase text-primary">
                 {lesson.concept}
@@ -108,7 +108,7 @@ export default async function LessonPage({ params }: Props) {
           </div>
 
           {/* Challenge */}
-          <div className="border-b border-dashed border-hairline p-8">
+          <div className="border-b border-dashed border-hairline p-5 md:p-8">
             <p className="text-xs font-semibold tracking-[2.52px] uppercase text-mute mb-3">
               Your Challenge
             </p>
@@ -119,7 +119,7 @@ export default async function LessonPage({ params }: Props) {
           <LessonExplanation lesson={lesson} />
 
           {/* Tags */}
-          <div className="p-8 border-t border-hairline">
+          <div className="p-5 md:p-8 border-t border-hairline">
             <div className="flex items-center gap-2 flex-wrap">
               <Tag size={12} className="text-mute" />
               {lesson.tags.map((tag) => (
@@ -134,9 +134,9 @@ export default async function LessonPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Right: Code playground */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 p-6 min-h-0">
+        {/* Code playground */}
+        <div className="flex flex-col md:flex-1 md:min-h-0">
+          <div className="p-4 md:p-6 h-105 md:h-auto md:flex-1 md:min-h-0">
             <CodePlayground
               starterCode={lesson.starterCode}
               solution={lesson.solution}
@@ -166,7 +166,7 @@ export default async function LessonPage({ params }: Props) {
 
 function LessonExplanation({ lesson }: { lesson: Lesson }) {
   return (
-    <div className="p-8 border-b border-dashed border-hairline">
+    <div className="p-5 md:p-8 border-b border-dashed border-hairline">
       <p className="text-xs font-semibold tracking-[2.52px] uppercase text-mute mb-4">
         The Explanation
       </p>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowRight, Clock, ChevronRight, CheckCircle } from "lucide-react"
+import { ArrowRight, Clock, ChevronRight } from "lucide-react"
 import { getTechModule, getLessonsForPath } from "@/content/registry"
 import type { Lesson } from "@/lib/types"
 
@@ -10,10 +10,10 @@ interface Props {
 
 export default async function PathPage({ params }: Props) {
   const { tech: techId, pathId } = await params
-  const module = getTechModule(techId)
-  if (!module) notFound()
+  const techModule = getTechModule(techId)
+  if (!techModule) notFound()
 
-  const path = module.paths.find((p) => p.id === pathId)
+  const path = techModule.paths.find((p) => p.id === pathId)
   if (!path) notFound()
 
   const lessons = getLessonsForPath(techId, pathId) as Lesson[]
@@ -21,7 +21,7 @@ export default async function PathPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-canvas">
       {/* Header */}
-      <section className="border-b border-hairline px-8 py-12">
+      <section className="border-b border-hairline px-4 md:px-8 py-10 md:py-12">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-center gap-2 text-xs text-mute mb-8">
             <Link href="/" className="hover:text-ink transition-colors">
@@ -32,7 +32,7 @@ export default async function PathPage({ params }: Props) {
               href={`/${techId}`}
               className="hover:text-ink transition-colors"
             >
-              {module.name}
+              {techModule.name}
             </Link>
             <ChevronRight size={12} />
             <span className="text-body">{path.name}</span>
@@ -56,7 +56,7 @@ export default async function PathPage({ params }: Props) {
       </section>
 
       {/* Lesson list */}
-      <section className="px-8 py-12">
+      <section className="px-4 md:px-8 py-10 md:py-12">
         <div className="mx-auto max-w-7xl max-w-2xl">
           <div className="space-y-3">
             {lessons.map((lesson, index) => (

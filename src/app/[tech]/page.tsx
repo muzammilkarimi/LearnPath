@@ -21,7 +21,7 @@ export default async function TechHubPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-canvas">
       {/* Header */}
-      <section className="border-b border-hairline px-8 py-16">
+      <section className="border-b border-hairline px-4 md:px-8 py-10 md:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-center gap-2 text-xs text-mute mb-8">
             <Link href="/" className="hover:text-ink transition-colors">
@@ -49,9 +49,9 @@ export default async function TechHubPage({ params }: Props) {
       </section>
 
       {/* Paths */}
-      <section className="px-8 py-16">
+      <section className="px-4 md:px-8 py-10 md:py-16">
         <div className="mx-auto max-w-7xl">
-          <p className="text-xs font-semibold tracking-[2.52px] uppercase text-mute mb-10">
+          <p className="text-xs font-semibold tracking-[2.52px] uppercase text-mute mb-8 md:mb-10">
             Learning Paths
           </p>
 
@@ -118,14 +118,14 @@ export default async function TechHubPage({ params }: Props) {
       </section>
 
       {/* Interview CTA */}
-      <section className="border-t border-dashed border-hairline px-8 py-12">
+      <section className="border-t border-dashed border-hairline px-4 md:px-8 py-10 md:py-12">
         <div className="mx-auto max-w-7xl">
-          <div className="border border-hairline rounded-[8px] p-8 flex items-center justify-between">
+          <div className="border border-hairline rounded-[8px] p-6 md:p-8 flex flex-col sm:flex-row sm:items-center gap-5 sm:justify-between">
             <div>
               <p className="text-xs font-semibold tracking-[2.52px] uppercase text-mute mb-2">
                 Interview Prep
               </p>
-              <h3 className="text-2xl font-semibold text-ink mb-1">
+              <h3 className="text-xl md:text-2xl font-semibold text-ink mb-1">
                 Ready to pass the interview?
               </h3>
               <p className="text-sm text-body">
@@ -135,7 +135,7 @@ export default async function TechHubPage({ params }: Props) {
             </div>
             <Link
               href={`/${techId}/interview`}
-              className="flex items-center gap-2 bg-primary text-on-primary font-semibold px-5 py-3 rounded-[6px] text-sm hover:bg-primary-soft transition-colors whitespace-nowrap"
+              className="flex items-center gap-2 bg-primary text-on-primary font-semibold px-5 py-3 rounded-md text-sm hover:bg-primary-soft transition-colors whitespace-nowrap self-start sm:self-auto"
             >
               Interview Prep <ArrowRight size={14} />
             </Link>

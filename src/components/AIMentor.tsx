@@ -88,7 +88,7 @@ export function AIMentor({ lessonConcept, lessonTitle, challenge }: Props) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 flex items-center gap-2 bg-primary text-on-primary font-semibold px-4 py-3 rounded-full shadow-lg hover:bg-primary-soft transition-colors z-50"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 flex items-center gap-2 bg-primary text-on-primary font-semibold px-4 py-3 rounded-full shadow-lg hover:bg-primary-soft transition-colors z-50"
       >
         <MessageSquare size={16} />
         Ask Mentor
@@ -97,7 +97,7 @@ export function AIMentor({ lessonConcept, lessonTitle, challenge }: Props) {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-[380px] h-[520px] flex flex-col border border-hairline rounded-[8px] bg-canvas shadow-[0_20px_60px_rgba(0,0,0,0.7)] z-50">
+    <div className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-auto md:right-6 md:w-95 h-130 flex flex-col border-t md:border border-hairline md:rounded-lg bg-canvas shadow-[0_20px_60px_rgba(0,0,0,0.7)] z-50">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
         <div className="flex items-center gap-2">
