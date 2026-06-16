@@ -4,8 +4,9 @@ import { useState, useMemo, useCallback } from "react"
 import {
   ReactFlow,
   Background,
-  Controls,
+  Panel,
   MarkerType,
+  useReactFlow,
   type Node,
   type Edge,
   type NodeMouseHandler,
@@ -13,12 +14,47 @@ import {
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 
+import { Plus, Minus, Maximize2 } from "lucide-react"
 import { useProgressStore } from "@/store/progressStore"
 import type { Roadmap, RoadmapNode, NodeStatus } from "@/lib/types"
 import { RoadmapNodeCard, type RoadmapNodeData } from "./RoadmapNode"
 import { NodePanel } from "./NodePanel"
 
 const nodeTypes = { roadmapNode: RoadmapNodeCard }
+
+function ZoomControls() {
+  const { zoomIn, zoomOut, fitView } = useReactFlow()
+  return (
+    <Panel position="bottom-right">
+      <div className="flex flex-col border border-hairline rounded-xl bg-canvas overflow-hidden mb-2 mr-2">
+        <button
+          type="button"
+          onClick={() => zoomIn({ duration: 200 })}
+          className="p-2.5 text-mute hover:text-ink hover:bg-canvas-soft transition-colors border-b border-hairline"
+          aria-label="Zoom in"
+        >
+          <Plus size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={() => zoomOut({ duration: 200 })}
+          className="p-2.5 text-mute hover:text-ink hover:bg-canvas-soft transition-colors border-b border-hairline"
+          aria-label="Zoom out"
+        >
+          <Minus size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={() => fitView({ duration: 300, padding: 0.2 })}
+          className="p-2.5 text-mute hover:text-ink hover:bg-canvas-soft transition-colors"
+          aria-label="Fit view"
+        >
+          <Maximize2 size={13} />
+        </button>
+      </div>
+    </Panel>
+  )
+}
 
 interface Props {
   roadmap: Roadmap
@@ -51,10 +87,7 @@ export function RoadmapGraph({ roadmap }: Props) {
     id: node.id,
     type: "roadmapNode",
     position: node.position,
-    data: {
-      node,
-      status: getStatus(node),
-    } satisfies RoadmapNodeData,
+    data: { node, status: getStatus(node) } satisfies RoadmapNodeData,
   })), [roadmap.nodes, getStatus])
 
   const rfEdges: Edge[] = useMemo(() => roadmap.edges.map((edge) => ({
@@ -92,14 +125,13 @@ export function RoadmapGraph({ roadmap }: Props) {
 
   return (
     <div className="flex h-full">
-      {/* Graph */}
       <div className="flex-1 relative">
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 z-10 px-5 py-3 flex items-center gap-6 bg-canvas/90 backdrop-blur-sm border-b border-hairline">
           <div className="flex-1 h-1 bg-hairline rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${(stats.done / stats.total) * 100}%` }}
+              style={{ width: `${(stats.done / stats.total) * 100}%` }} /* dynamic progress width */
             />
           </div>
           <div className="flex items-center gap-4 text-xs text-mute shrink-0">
@@ -123,11 +155,14 @@ export function RoadmapGraph({ roadmap }: Props) {
           onNodeClick={handleNodeClick}
           fitView
           fitViewOptions={{ padding: 0.2 }}
-          minZoom={0.3}
+          minZoom={0.25}
           maxZoom={1.5}
           nodesDraggable={false}
           nodesConnectable={false}
-          panOnScroll
+          zoomOnScroll
+          zoomOnPinch
+          panOnDrag
+          preventScrolling={false}
           className="bg-canvas!"
         >
           <Background
@@ -136,14 +171,10 @@ export function RoadmapGraph({ roadmap }: Props) {
             size={1}
             color="rgba(255,255,255,0.04)"
           />
-          <Controls
-            className="bg-canvas! border-hairline! [&>button]:bg-canvas! [&>button]:border-hairline! [&>button]:text-mute! [&>button:hover]:text-ink! [&>button]:fill-current!"
-            showInteractive={false}
-          />
+          <ZoomControls />
         </ReactFlow>
       </div>
 
-      {/* Node detail panel */}
       {selectedNode && (
         <NodePanel
           node={selectedNode}
